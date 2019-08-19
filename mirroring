@@ -1,0 +1,118 @@
+//Global JavaScript
+
+function ggbOnInit() {
+    ggbApplet.registerAddListener("onAdd");
+    ggbApplet.setOnTheFlyPointCreationActive(false);
+    ggbApplet.evalCommand("StartAnimation[kesleltet,true]");
+}
+
+function onAdd(name) {
+
+    ggbApplet.debug("MISI_onAdd --- definitionstring: " + ggbApplet.getDefinitionString(name));
+    ggbApplet.debug("MISI_onAdd --- valuestring: " + ggbApplet.getValueString(name));
+    var commandstring = ggbApplet.getCommandString(name);
+    var objecttype = ggbApplet.getObjectType(name);
+    ggbApplet.debug("MISI_onAdd --- commandstring: " + commandstring);
+    ggbApplet.debug("MISI_onAdd --- objecttype: " + objecttype);
+    if (commandstring == "") {
+        var command = "";
+        var paramstring = "";
+        var parameterek = paramstring.split(",");
+        ggbApplet.debug("paramstring= " + paramstring);
+        var paramcount = parameterek.length;
+        ggbApplet.debug("MISI_onAdd --- command: " + command);
+    } else {
+        var command = commandstring.substr(0, commandstring.indexOf("["));
+        var paramstring = commandstring.substring(commandstring.indexOf("[") + 1, commandstring.indexOf("]"));
+        var parameterek = paramstring.split(",");
+        ggbApplet.debug("paramstring= " + paramstring);
+        var paramcount = parameterek.length;
+        ggbApplet.debug("MISI_onAdd --- command: " + command);
+
+    }
+    if (objecttype == "segment") {
+        var szin = ggbApplet.getColor("Ceruza");
+        ggbApplet.debug("színezés színe: " + szin);
+        ggbApplet.setColor(name, parseInt(szin.substr(1, 2), 16), parseInt(szin.substr(3, 2), 16), parseInt(szin.substr(5, 2), 16));
+        ggbApplet.setLineThickness(name, 5);
+        ggbApplet.renameObject(name, "szaksz_{" + (ggbApplet.getValue("szakszama") + 1) + "}");
+        ggbApplet.evalCommand("SetValue[szakszama,szakszama+1]");
+
+    } //if(objecttype==segment)
+
+}
+
+function ggbscriptel(mibe, mit) {
+    ggbApplet.debug("MISI -- ggbscriptel: mibe= " + mibe + " mit= " + mit);
+
+    var st2 = ggbApplet.getXML(mibe);
+    var ndx = st2.indexOf('<ggbscript val=');
+    if (ndx == -1) {
+        var ndx = st2.indexOf('</element>');
+        ggbApplet.debug("MISI -- ggbscriptel: ndx= " + ndx);
+
+        var st3 = st2.substr(0, ndx) + '\t<ggbscript val="' + mit + '"/>\n' + st2.substr(ndx);
+        ggbApplet.debug("MISI -- ggbscriptel: new st3= " + st3);
+        ggbApplet.evalXML(st3);
+    } else {
+        var ndx2 = st2.indexOf('"/>', ndx + 1);
+
+        var st3 = st2.substr(0, ndx) + '<ggbscript val="' + mit + st2.substr(ndx2);
+        ggbApplet.evalXML(st3);
+        ggbApplet.debug("MISI -- szogmeret: st3= " + st3);
+    }
+}
+
+function kivalaszthato(a0, a1) {
+    //a0: mit
+    //a1: kiválasztható ha true
+    ggbApplet.debug("MISI -- kivalaszthato: a0= " + a0 + " a1= " + a1);
+
+    var st2 = ggbApplet.getXML(a0);
+    if (st2.search('<selectionAllowed ') == -1) {
+        var ndx = st2.indexOf('</element>');
+        ggbApplet.debug("MISI -- ndx= " + ndx);
+        //st2.insert(st2.indexOf('</element>'),'<selectionAllowed val="'+a1+'"/>');
+        var st3 = st2.substr(0, ndx) + '\t<selectionAllowed val="false"/>\n' + st2.substr(ndx);
+        ggbApplet.debug("MISI -- kivalaszthato: new st3= " + st3);
+        ggbApplet.evalXML(st3);
+    } else {
+        var st3 = st2.replace('<selectionAllowed val="' + !a1 + '"/>', '<selectionAllowed val="' + a1 + '"/>');
+        ggbApplet.debug("MISI -- kivalaszthato: st3= " + st3);
+        ggbApplet.evalXML(st3);
+    }
+    
+    //general button
+    var egysor=ggbApplet.getValue('egysor');
+alert('egysor= '+egysor);
+for(var j=0;j<egysor;j++){
+     for(var i=0;i<egysor;i++){
+          ggbApplet.evalCommand('SetFixed[P_{'+(j*egysor+i)+'},false]');
+          ggbApplet.deleteObject('P_{'+(j*egysor+i)+'}');
+          ggbApplet.evalCommand('P_{'+(j*egysor+i)+'}=('+i+','+j+')');
+          if(i<(j)){kivalaszthato('P_{'+(j*egysor+i)+'}',false);};
+          ggbApplet.evalCommand('SetFixed[P_{'+(j*egysor+i)+'},true]');
+          //ggbscriptel('P_{'+(j*egysor+i)+'}','SetValue[rajzolunk,!rajzolunk]&#10;If[rajzolunk==false,RunClickScript[szakaszindit]]');
+     }//for(i)
+}//for(j)
+ggbApplet.evalCommand('tükör=léc2[P_{0}, P_{'+(egysor*egysor-1)+'}, 0.2]');
+ggbApplet.evalCommand('SetColor[tükör,175/255,238/255,238/255]');
+ggbApplet.evalCommand('SetFilling[tükör,40]');
+kivalaszthato('tükör',false)
+
+//choose
+var egysor = ggbApplet.getValue('egysor');
+//alert('egysor= '+egysor);
+
+for (var j = 0; j < egysor; j++) {
+    for (var i = 0; i < egysor; i++) {
+        ggbApplet.evalCommand('SetFixed[P_{' + (j * egysor + i) + '},false]');
+        //ggbApplet.deleteObject('P_{'+(j*egysor+i)+'}');
+        //ggbApplet.evalCommand('P_{'+(j*egysor+i)+'}=('+i+','+j+')');
+        if (i < (j)) {
+            kivalaszthato('P_{' + (j * egysor + i) + '}', false);
+        };
+        ggbApplet.evalCommand('SetFixed[P_{' + (j * egysor + i) + '},true]');
+        //ggbscriptel('P_{'+(j*egysor+i)+'}','SetValue[rajzolunk,!rajzolunk]&#10;If[rajzolunk==false,RunClickScript[szakaszindit]]');
+    } //for(i)
+} //for(j)
