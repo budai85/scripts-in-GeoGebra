@@ -1,0 +1,24 @@
+ggbApplet.evalCommand("SetActiveView(1)");
+var x, y, total = 0,
+    n = 0
+
+    n = ggbApplet.getValue("NumberToRemove")
+    ggbApplet.setValue("NumberToRemove", 0)
+    for (var i = 0; i < n; i++) {
+        ggbApplet.deleteObject("A_{" + i + "}")
+    }
+
+n = ggbApplet.getValue("addp")
+for (var i = 0; i < n; i++) {
+    x = Math.random()
+    y = Math.random()
+    ggbApplet.evalCommand("A_{" + i + "}=(" + x + "," + y + ")")
+    ggbApplet.evalCommand("SetColor(A_{" + i + "},0,0,0 )")
+    if (x * x + y * y < 1) {
+        total++
+        ggbApplet.evalCommand("SetColor(A_{" + i + "},1,0,0 )")
+    }
+}
+ggbApplet.evalCommand("tot = tot + " + total)
+ggbApplet.evalCommand("n = n + " + n)
+ggbApplet.setValue("NumberToRemove", n)
